@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload & Crop | Minding Forward</title>
+
+  <!-- ✅ Cropper CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/cropperjs/dist/cropper.min.css">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    header {
+      background: rgba(30, 58, 138, 0.95);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    nav {
+      margin-top: 1rem;
+    }
+
+    nav a {
+      color: #fff;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: all 0.3s;
+      display: inline-block;
+    }
+
+    nav a:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    main {
+      padding: 2rem;
+      max-width: 900px;
+      margin: 2rem auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    h2 {
+      color: #1e3a8a;
+      margin-bottom: 0.5rem;
+      font-size: 1.8rem;
+    }
+
+    main > p {
+      color: #666;
+      margin-bottom: 2rem;
+      font-size: 1rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+      margin-top: 1.5rem;
+      font-size: 0.95rem;
+    }
+
+    input[type="text"],
+    input[type="file"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.3s;
+      background: #fafafa;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    input[type="file"] {
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    /* ✅ PROPER CROPPER CONTAINER */
+    #cropperContainer {
+      width: 100%;
+      max-width: 100%;
+      min-height: 450px;
+      margin: 2rem auto;
+      position: relative;
+      background: #f9fafb;
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #cropImage {
+      max-width: 100%;
+      max-height: 500px;
+      display: none;
+    }
+
+    /* Cropper controls styling */
+    .cropper-view-box,
+    .cropper-face {
+      border-radius: 8px;
+    }
+
+    .cropper-line,
+    .cropper-point {
+      background-color: #667eea !important;
+    }
+
+    .cropper-point.point-se {
+      width: 12px !important;
+      height: 12px !important;
+      background-color: #10b981 !important;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      cursor: pointer;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s;
+      margin-top: 1.5rem;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      width: 100%;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    #statusText {
+      margin-top: 1rem;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 500;
+      text-align: center;
+      display: none;
+    }
+
+    #statusText.show {
+      display: block;
+    }
+
+    #statusText.success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #10b981;
+    }
+
+    #statusText.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #ef4444;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #9ca3af;
+      font-size: 1rem;
+      padding: 3rem;
+    }
+
+    .empty-state::before {
+      content: "📸";
+      display: block;
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: white;
+      font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      main {
+        margin: 1rem;
+        padding: 1.5rem;
+      }
+
+      header h1 {
+        font-size: 1.5rem;
+      }
+
+      nav a {
+        margin: 0 8px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Minding Forward</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="store.html">Store</a>
+      <a href="upload.html">Upload</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>📸 Upload & Crop Your Photo</h2>
+    <p>Select an image, crop it to a perfect square, and submit it with your transaction number.</p>
+
+    <!-- Transaction number -->
+    <label for="transactionNumber">Transaction Number *</label>
+    <input type="text" id="transactionNumber" placeholder="e.g. ORD-12345" required>
+
+    <!-- File selection -->
+    <label for="fileInput">Select Your Image *</label>
+    <input type="file" id="fileInput" accept="image/*">
+
+    <!-- ✅ CROPPER CONTAINER -->
+    <div id="cropperContainer">
+      <div class="empty-state" id="emptyState">
+        Select an image above to begin cropping
+      </div>
+      <img id="cropImage" alt="Crop target">
+    </div>
+
+    <!-- Submit -->
+    <button id="submitBtn" class="btn">✂️ Crop & Submit Image</button>
+
+    <div id="statusText"></div>
+  </main>
+
+  <footer>
+    <p>© 2025 Minding Forward. All rights reserved.</p>
+  </footer>
+
+  <!-- ✅ Cropper JS -->
+  <script src="https://unpkg.com/cropperjs/dist/cropper.min.js"></script>
+
+  <!-- ✅ Cropper Initialization -->
+  <script>
+    let cropper;
+
+    const fileInput = document.getElementById("fileInput");
+    const cropImage = document.getElementById("cropImage");
+    const submitBtn = document.getElementById("submitBtn");
+    const statusText = document.getElementById("statusText");
+    const emptyState = document.getElementById("emptyState");
+
+    // ✅ Load Selected Image
+    fileInput.addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        cropImage.src = e.target.result;
+        cropImage.style.display = "block";
+        emptyState.style.display = "none";
+
+        // Destroy previous instance if any
+        if (cropper) cropper.destroy();
+
+        // ✅ WAIT FOR IMAGE TO RENDER FIRST
+        cropImage.onload = function () {
+          cropper = new Cropper(cropImage, {
+            aspectRatio: 1,
+            viewMode: 1,
+            dragMode: "move",
+            autoCropArea: 0.9,
+            responsive: true,
+            background: false,
+            guides: true,
+            center: true,
+            highlight: true,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: false,
+          });
+
+          showStatus("Image loaded! Adjust the crop area and click submit.", "success");
+        };
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // ✅ Export cropped image
+    submitBtn.addEventListener("click", async () => {
+      const txn = document.getElementById("transactionNumber").value.trim();
+      if (!txn) {
+        showStatus("Please enter your transaction number.", "error");
+        return;
+      }
+
+      if (!cropper) {
+        showStatus("Please upload and crop an image before submitting.", "error");
+        return;
+      }
+
+      showStatus("Creating cropped image...", "success");
+
+      cropper.getCroppedCanvas({
+        width: 1080,
+        height: 1080,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high'
+      }).toBlob((blob) => {
+        const fileName = `${txn}_${Date.now()}.png`;
+
+        // ✅ Download to user
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+
+        showStatus("✅ Cropped image downloaded successfully!", "success");
+
+        // Reset
+        setTimeout(() => {
+          fileInput.value = "";
+          if (cropper) cropper.destroy();
+          cropImage.style.display = "none";
+          emptyState.style.display = "block";
+          document.getElementById("transactionNumber").value = "";
+          statusText.classList.remove("show");
+        }, 3000);
+      }, "image/png");
+    });
+
+    function showStatus(message, type) {
+      statusText.textContent = message;
+      statusText.className = `show ${type}`;
+    }
+  </script>
+
+</body>
+</html>
